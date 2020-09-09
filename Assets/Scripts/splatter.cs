@@ -2,61 +2,72 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random=UnityEngine.Random;
 
 
 public class splatter : MonoBehaviour
 {
     // Start is called before the first frame update
     public float maxScale, minScale;
-    public float minAspectRatio, maxAspectRatio;
     public Sprite src;
-    public Texture dst;
+    public Texture2D dst;
+    private float aspectRatio;
+    private Rect dstRect;
+    private Color[] mapSrcPixels;
+    private Color[] mapDstPixels;
 
     void Start()
     {
-
+        aspectRatio = Camera.main.aspect;
+        Debug.Log(aspectRatio);
+        BlitDrop();
     }
 
-    void BlitDrop(Sprite src, Texture dst)
+    void BlitDrop()
     {
 	// Select a random scale for this drop
-	float scaleX = minScale + 
-		(Random.value * (maxScale - minScale));
+    src.texture.filterMode = FilterMode.Bilinear;
+    mapSrcPixels = src.texture.GetPixels(0,0,(int)src.rect.width,(int)src.rect.height);
+    foreach (var item in mapSrcPixels)
+    {
+        Debug.Log(item);
+    }
 
-	float aspectRatio = minAspectRatio + 
-		(Random.value * (maxAspectRatio - minAspectRatio));
+	// float scaleX = minScale + 
+	// 	(Random.value * (maxScale - minScale));
 
-	float scaleY = scaleX * aspectRatio;
+	// aspectRatio = aspectRatio * Random.value;
 
-	// Calculate the destination rect for this drop
-	Rect dstRect = new Rect()
-	{
-		width = src.textureRect.width * scaleX,
-		height = src.textureRect.height * scaleY
-	};
+	// float scaleY = scaleX * aspectRatio;
 
-	dstRect.x = random.Next(0, dst.width - (int) dstRect.width);
-	dstRect.y = random.Next(0, dst.width - (int) dstRect.height);
+	// // Calculate the destination rect for this drop
+	// dstRect = new Rect()
+	// {
+	// 	width = src.bounds.size.x * scaleX,
+	// 	height = src.bounds.size.y * scaleY
+	// };
 
-	// Copy pixels from the drop (src) to the stain (dst)
-	for (int y = 0; y < dstRect.height; ++y)
-	{
-		for (int x = 0; x < dstRect.width; ++x)
-		{
-			// Since the source drop is scaled, we bilinearly sample the 4 pixels 
-			// around the exact location we want to sample
-			Color srcColor = SampleBilinear(src.texture, 
-				srcRect.x + x / scaleX, srcRect.y + y / scaleY);
+	// dstRect.x = Random.value * (dst.width - (int) dstRect.width);
+	// dstRect.y = Random.value * (dst.width - (int) dstRect.height);
 
-			Color dstColor = dst.GetPixel((int)dstRect.x + x, (int) dstRect.y + y);
+	// // Copy pixels from the drop (src) to the stain (dst)
+	// for (int y = 0; y < dstRect.height; ++y)
+	// {
+	// 	for (int x = 0; x < dstRect.width; ++x)
+	// 	{
+	// 		// Since the source drop is scaled, we bilinearly sample the 4 pixels 
+	// 		// around the exact location we want to sample
+	// 		mapSrcPixels[x + y] = (int)src.texture.GetPixel(x, y);
+
+	// 		mapDstPixels = dst.GetPixel(x, y);
 			
-			// Write the new pixel value to the stain texture by taking
-			// the maximum of the previous value and the new value
-			dstColor = new Color(0, 0, 0, Math.Max(srcColor.a, dstColor.a));
+	// 		// Write the new pixel value to the stain texture by taking
+	// 		// the maximum of the previous value and the new value
+	// 		dstColor = new Color(0, 0, 0, Math.Max(srcColor.a, dstColor.a));
 
-			dst.SetPixel((int)dstRect.x + x, (int)dstRect.y + y, dstColor);
-		}
-	}
+	// 		dst.SetPixel((int)dstRect.x + x, (int)dstRect.y + y, dstColor);
+	// 	}
+	// }
 }
 
 
